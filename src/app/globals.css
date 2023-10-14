@@ -63,3 +63,6 @@ body {
   background-position: 80% 20%;
   /* background: white center/cover url("/public/1picture.png") no-repeat; */
 }
+* {
+  box-sizing: border-box;
+}

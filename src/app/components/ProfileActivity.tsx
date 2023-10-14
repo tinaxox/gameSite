@@ -1,20 +1,68 @@
 "use client";
-import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ChangeEvent,
+  LegacyRef,
+  MutableRefObject,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { User } from "../Types";
 import { ArrowIcon, NotificationsIcon, PersonIcon } from "./Icons";
 import { DropDownLanguage } from "./DropDownLanguage";
+import Image from "next/image";
 
 interface ProfileActivityProps {
   user: User;
+  closeMenu: () => void;
 }
 
-export function ProfileActivity({ user }: ProfileActivityProps) {
-  const [messages, setMessages] = useState<
-    { user: string; pfp: string; message: string; time: string }[]
-  >([
+interface SideMenuProps {
+  user: User;
+}
+
+export function SideMenu({ user }: SideMenuProps) {
+  const [menuActive, setMenuActive] = useState(false);
+  const handleMenuActive = () => {
+    setMenuActive(true);
+  };
+  const closeMenu = () => {
+    setMenuActive(false);
+  };
+  return (
+    <>
+      <AnimatePresence>
+        {menuActive && <ProfileActivity closeMenu={closeMenu} user={user} />}
+      </AnimatePresence>
+      {!menuActive && (
+        <button
+          onClick={handleMenuActive}
+          className="px-1.5 py-1.5 fixed bottom-2 right-3 hover:bg-gradient-to-br hover:from-orange-500 hover:to-yellow-400 bg-gradient-to-br from-orange-600 to-yellow-500 rounded-xl justify-center items-center"
+        >
+          <Image
+            width={50}
+            height={50}
+            alt="chat"
+            src="/chatRoom.png"
+            className="  w-7 h-7  "
+          />
+        </button>
+      )}
+    </>
+  );
+}
+interface IMessage {
+  user: string;
+  pfp: string;
+  message: string;
+  time: string;
+}
+function ProfileActivity({ user, closeMenu }: ProfileActivityProps) {
+  const [messages, setMessages] = useState<IMessage[]>([
     {
       user: "William",
-      pfp: "man1.jpg",
+      pfp: "/man1.jpg",
       message: "i go sleep",
       time: "7:53 AM",
     },
@@ -61,28 +109,67 @@ export function ProfileActivity({ user }: ProfileActivityProps) {
       time: "7:53 AM",
     },
   ]);
-
   const [numberOfPeople, setNumberOfPeople] = useState(128);
+  const [newMessage, setNewMessage] = useState("");
+  const handleInput = (e: ChangeEvent<HTMLInputElement>) => {
+    setNewMessage(e.target.value);
+  };
+  const ref = useRef<HTMLDivElement>(null); // components/MessageList.tsx
+  useEffect(() => {
+    console.log(messages);
+    if (messages.length) {
+      ref.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "end",
+      });
+    }
+  }, [messages]);
+
+  const sendMessage = () => {
+    const m: IMessage = {
+      user: user.username,
+      pfp: user.pfp,
+      message: newMessage,
+      time: new Date().toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "numeric",
+        hour12: true,
+      }),
+    };
+    setMessages((prev) => [...prev, m]);
+  };
   return (
-    <div className="flex flex-col bg-zinc-900 w-[19%] ml-5 px-8 relative gap-10 h-screen ">
+    <motion.div
+      initial={{ translateX: "20%" }}
+      animate={{ translateX: "0%" }}
+      exit={{ translateX: "100%" }}
+      transition={{ bounce: 0 }}
+      className="hidden lg:flex flex-col bg-zinc-900 w-[25%] ml-5 px-4 right-0 top-0 gap-10 h-screen fixed"
+    >
       <div className="flex flex-col mt-5">
-        <div className="flex items-center ">
-          <img src="/pfp.jpg" className="rounded-full w-14 h-14" />
-          <div className="flex flex-col gap-1 ml-3">
-            <p className=" text-white font-semibold cursor-pointer ">
-              {user.username}
-            </p>
-            <p className="text-white text-sm font-medium">
-              <span className="text-sm text-zinc-600 font-semibold mr-1">
-                Balance:
-              </span>
-              ${user.balance}
-            </p>
+        <div className="flex items-center justify-between ">
+          <div className="flex gap-1 items-center">
+            <Image
+              width={50}
+              height={50}
+              alt="pfp"
+              src="/pfp.jpg"
+              className="rounded-full w-14 h-14"
+            />
+            <div className="flex flex-col gap-1 ml-3">
+              <p className=" text-white font-semibold cursor-pointer ">
+                {user.username}
+              </p>
+              <p className="text-white text-sm font-medium">
+                <span className="text-sm text-zinc-600 font-semibold mr-1">
+                  Balance:
+                </span>
+                ${user.balance}
+              </p>
+            </div>
           </div>
-          <button className="bg-zinc-800 p-2 rounded-xl ml-5 min-w-max">
-            <img src="/message.png" className="w-6 h-6" />
-          </button>
-          <button className="bg-zinc-800 p-2 rounded-xl  ml-3 relative">
+
+          <button className="bg-zinc-800 p-2 rounded-xl  ml-3 relative flex">
             <NotificationsIcon className="w-6 h-6 stroke-white" />
             <div className=" text-xs absolute bg-red-500 text-white rounded-full px-1 py-0.5 flex justify-center items-center -top-2 -right-2">
               {user.notifications > 9 ? "9+" : user.notifications}
@@ -98,51 +185,64 @@ export function ProfileActivity({ user }: ProfileActivityProps) {
         </button>
         <div className="flex justify-between w-full items-center">
           <DropDownLanguage classname="" mainMenu={false} />
-          <button className="p-2 bg-zinc-800 rounded-full">
+          <button onClick={closeMenu} className="p-2 bg-zinc-800 rounded-full">
             <ArrowIcon className="w-5 h-5 stroke-neutral-400 hover:stroke-neutral-100 stroke-2 rotate-180" />
           </button>
         </div>
       </div>
-      <ul className="flex flex-col gap-4 overflow-y-scroll">
+      <div className="flex flex-col gap-4 overflow-y-scroll">
         {messages.map((message) => (
-          <li
-            key={message.message}
-            className="px-4 py-3 rounded-xl bg-zinc-800 flex justify-between"
-          >
-            <div className="flex gap-4">
-              <div
-                style={{
-                  backgroundColor: "blue",
-                  backgroundImage: `url(${message.pfp})`,
-                  backgroundRepeat: "no-repeat",
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                }}
-                className="w-[50px] h-[50px] bg-red-400 aspect-square rounded-[50%]"
-              ></div>
-              <div className="flex flex-col gap-1">
-                <p className="text-xs text-zinc-500 cursor-pointer font-semibold">
-                  {message.user}
-                </p>
-                <p className="text-sm text-zinc-200">{message.message}</p>
-              </div>
-            </div>
-            <p className="text-xs text-zinc-500 whitespace-nowrap">
-              {message.time}
-            </p>
-          </li>
+          <div ref={ref}>
+            <ChatListItem key={message.message} message={message} />
+          </div>
         ))}
-      </ul>
+      </div>
+      {/* <div ref={ref} /> */}
       <div className="flex w-full justify-between mt-auto mb-5">
         <input
           type="text"
           placeholder="Write your message..."
-          className="px-2 py-1 rounded-xl bg-zinc-900 w-[80%] font-medium"
+          className="px-2 py-1 rounded-xl bg-zinc-900 w-[80%] font-medium text-neutral-400"
+          onChange={handleInput}
         />
-        <button className="p-2 bg-gradient-to-br from-orange-600 to-yellow-500 rounded-full ">
+        <button
+          onClick={sendMessage}
+          className="p-2 bg-gradient-to-br from-orange-600 to-yellow-500 rounded-full "
+        >
           <ArrowIcon className="w-5 h-5 stroke-neutral-100 stroke-2 rotate-90" />
         </button>
       </div>
-    </div>
+      {/* <SideMenu /> */}
+    </motion.div>
+  );
+}
+
+interface ChatListItemProps {
+  message: IMessage;
+}
+function ChatListItem({ message }: ChatListItemProps) {
+  return (
+    <li className="px-4 py-3 rounded-xl bg-zinc-800 flex gap-3 ">
+      <div className="min-w-[50px] flex items-center justify-center w-[50px] h-[50px] max-w-[50px] max-h-[50px] min-h-[50px] bg-red-400 overflow-hidden rounded-full ">
+        <Image
+          src={message.pfp}
+          alt={message.user}
+          width={100}
+          height={100}
+          className="object-cover h-full object-center"
+        />
+      </div>
+      <div className="flex flex-col w-full gap-2">
+        <div className="flex justify-between ">
+          <p className="text-xs text-zinc-500 cursor-pointer font-semibold">
+            {message.user}
+          </p>
+          <p className="text-xs text-zinc-500 whitespace-nowrap">
+            {message.time}
+          </p>
+        </div>
+        <p className="text-sm text-zinc-200">{message.message}</p>
+      </div>
+    </li>
   );
 }

@@ -3,6 +3,7 @@ export type User = {
   balance: number;
   notifications: number;
   bitcoinAmount: number;
+  pfp: string;
 };
 export type Weapon = {
   name: string;
