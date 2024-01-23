@@ -23,21 +23,22 @@ interface SideMenuProps {
 }
 
 export function SideMenu({ user }: SideMenuProps) {
-  const [menuActive, setMenuActive] = useState(false);
-  const handleMenuActive = () => {
-    setMenuActive(true);
+  const [chatActive, setChatActive] = useState(false);
+
+  const handleChatActive = () => {
+    setChatActive(true);
   };
-  const closeMenu = () => {
-    setMenuActive(false);
+  const closeChat = () => {
+    setChatActive(false);
   };
   return (
     <>
       <AnimatePresence>
-        {menuActive && <ProfileActivity closeMenu={closeMenu} user={user} />}
+        {chatActive && <ProfileActivity closeMenu={closeChat} user={user} />}
       </AnimatePresence>
-      {!menuActive && (
+      {!chatActive && (
         <button
-          onClick={handleMenuActive}
+          onClick={handleChatActive}
           className="px-1.5 py-1.5 fixed bottom-2 right-3 hover:bg-gradient-to-br hover:from-orange-500 hover:to-yellow-400 bg-gradient-to-br from-orange-600 to-yellow-500 rounded-xl justify-center items-center"
         >
           <Image
@@ -144,61 +145,68 @@ function ProfileActivity({ user, closeMenu }: ProfileActivityProps) {
       animate={{ translateX: "0%" }}
       exit={{ translateX: "100%" }}
       transition={{ bounce: 0 }}
-      className="hidden lg:flex flex-col bg-zinc-900 w-[25%] ml-5 px-4 right-0 top-0 gap-10 h-screen fixed"
+      className="lg:flex flex-col bg-zinc-900 md:w-[35%] lg:w-[25%] sm:w-full ml-5 px-4 right-0 top-0 gap-7 h-screen fixed z-30"
     >
-      <div className="flex flex-col mt-5">
-        <div className="flex items-center justify-between ">
-          <div className="flex gap-1 items-center">
-            <Image
-              width={50}
-              height={50}
-              alt="pfp"
-              src="/pfp.jpg"
-              className="rounded-full w-14 h-14"
-            />
-            <div className="flex flex-col gap-1 ml-3">
-              <p className=" text-white font-semibold cursor-pointer ">
-                {user.username}
+      <div>
+        <div className="flex flex-col mt-5 h-[20%]">
+          <div className="flex items-center justify-between ">
+            <div className="flex gap-1 items-center">
+              <Image
+                width={50}
+                height={50}
+                alt="pfp"
+                src="/pfp.jpg"
+                className="rounded-full w-14 h-14"
+              />
+              <div className="flex flex-col gap-1 ml-3">
+                <p className=" text-white font-semibold cursor-pointer ">
+                  {user.username}
+                </p>
+                <p className="text-white text-sm font-medium">
+                  <span className="text-sm text-zinc-600 font-semibold mr-1">
+                    Balance:
+                  </span>
+                  ${user.balance}
+                </p>
+              </div>
+            </div>
+
+            <button className="bg-zinc-800 p-2 rounded-xl  ml-3 relative flex">
+              <NotificationsIcon className="w-6 h-6 stroke-white" />
+              <div className=" text-xs absolute bg-red-500 text-white rounded-full px-1 py-0.5 flex justify-center items-center -top-2 -right-2">
+                {user.notifications > 9 ? "9+" : user.notifications}
+              </div>
+            </button>
+          </div>
+          <div className="flex gap-6 w-full justify-center mt-3 mb-4 md:mb-0">
+            <button className=" flex justify-center items-center gap-1 md:gap-2">
+              <PersonIcon className="w-5 h-5 stroke-zinc-400 stroke-2 hover:stroke-pink-700" />
+              <p className="text-white text-sm md:text-base font-semibold">
+                {numberOfPeople}
               </p>
-              <p className="text-white text-sm font-medium">
-                <span className="text-sm text-zinc-600 font-semibold mr-1">
-                  Balance:
-                </span>
-                ${user.balance}
-              </p>
+            </button>
+            <div className="flex justify-between w-full items-center">
+              <DropDownLanguage classname="" mainMenu={false} />
+              <button
+                onClick={closeMenu}
+                className="p-2 bg-zinc-800 rounded-full"
+              >
+                <ArrowIcon className="w-5 h-5 stroke-neutral-400 hover:stroke-neutral-100 stroke-2 rotate-180" />
+              </button>
             </div>
           </div>
-
-          <button className="bg-zinc-800 p-2 rounded-xl  ml-3 relative flex">
-            <NotificationsIcon className="w-6 h-6 stroke-white" />
-            <div className=" text-xs absolute bg-red-500 text-white rounded-full px-1 py-0.5 flex justify-center items-center -top-2 -right-2">
-              {user.notifications > 9 ? "9+" : user.notifications}
-            </div>
-          </button>
-        </div>
-        <div className="border-b-[2px] border-b-zinc-600 border-opacity-20 w-full absolute inset-x-0 top-24"></div>
-      </div>
-      <div className="flex gap-3 w-full justify-center">
-        <button className="rounded-2xl p-2 bg-zinc-800 flex gap-2">
-          <PersonIcon className="w-6 h-6 stroke-zinc-400 stroke-2 hover:stroke-pink-700" />
-          <p className="text-white font-semibold">{numberOfPeople}</p>
-        </button>
-        <div className="flex justify-between w-full items-center">
-          <DropDownLanguage classname="" mainMenu={false} />
-          <button onClick={closeMenu} className="p-2 bg-zinc-800 rounded-full">
-            <ArrowIcon className="w-5 h-5 stroke-neutral-400 hover:stroke-neutral-100 stroke-2 rotate-180" />
-          </button>
+          {/* <div className="border-b-[2px] border-b-zinc-600 border-opacity-20 w-full absolute top-60"></div> */}
         </div>
       </div>
-      <div className="flex flex-col gap-4 overflow-y-scroll">
+      <div className="flex flex-col gap-4 overflow-y-scroll h-[75%] mt-7 lg:mt-2">
         {messages.map((message) => (
-          <div ref={ref}>
+          <div ref={ref} key={"div" + message.message}>
             <ChatListItem key={message.message} message={message} />
           </div>
         ))}
       </div>
       {/* <div ref={ref} /> */}
-      <div className="flex w-full justify-between mt-auto mb-5">
+      <div className="flex w-full justify-between mt-3 md:mt-5 mb-6 md:mb-4">
         <input
           type="text"
           placeholder="Write your message..."

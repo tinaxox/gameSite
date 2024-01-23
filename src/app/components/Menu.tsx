@@ -1,8 +1,11 @@
 "use client";
 import { useState } from "react";
-import { ArrowIcon, GiftIcon, SupportIcon } from "./Icons";
+import { ArrowIcon, GiftIcon, MenuIcon, SupportIcon } from "./Icons";
 import { Activity } from "../Types";
 import { DropDownLanguage } from "./DropDownLanguage";
+import { motion, AnimatePresence } from "framer-motion";
+
+import Image from "next/image";
 
 const socialNetworks: string[] = [
   "/instagram.png",
@@ -11,8 +14,40 @@ const socialNetworks: string[] = [
   "/tiktok.png",
   "/discord.png",
 ];
+interface MenuContainerProps {
+  className?: string;
+}
+export function MenuContainer({ className }: MenuContainerProps) {
+  const [menuActive, setMenuActive] = useState(false);
 
-export function Menu() {
+  const openMenu = () => {
+    setMenuActive(true);
+  };
+  const closeMenu = () => {
+    setMenuActive(false);
+  };
+  return (
+    <>
+      <AnimatePresence>
+        {menuActive && <Menu closeMenu={closeMenu} />}
+      </AnimatePresence>
+      {!menuActive && (
+        <button
+          onClick={openMenu}
+          className={` ${className} px-1.5 py-1.5 lg:hidden bottom-2 left-3 fixed hover:bg-gradient-to-br hover:from-orange-500 hover:to-yellow-400 bg-gradient-to-br from-orange-600 to-yellow-500 rounded-xl justify-center items-center`}
+        >
+          <MenuIcon className="w-7 h-7 stroke-white stroke-2" />
+        </button>
+      )}
+    </>
+  );
+}
+
+interface MenuProps {
+  className?: string;
+  closeMenu?: () => void;
+}
+export function Menu({ closeMenu, className }: MenuProps) {
   const [activities, setActivities] = useState<Activity[]>([
     { name: "Mini Games", image: "/controller.png", hot: false },
     { name: "Casino", image: "/slotmachine.png", hot: false },
@@ -28,12 +63,16 @@ export function Menu() {
     { name: "VIP Levels", image: "star.png" },
     { name: "FAQ", image: "/faq.png" },
   ];
-  const closeMenu = () => {
-    setMenuActive(false);
-  };
+
   return (
-    <div className="hidden md:hidden lg:block w-[20vw] h-screen">
-      <div className="hidden md:hidden lg:flex lg:flex-col bg-zinc-900 w-[20vw] mr-5 h-screen fixed top-0  ">
+    <motion.div
+      initial={{ translateX: "-20%" }}
+      animate={{ translateX: "0%" }}
+      exit={{ translateX: "-100%" }}
+      transition={{ bounce: 0 }}
+      className={`${className} lg:w-[20vw] sm:w-full md:w-[50vw] lg-[30vw] h-screen z-30 fixed top-0 left-0`}
+    >
+      <div className="  bg-zinc-900 lg:w-[20vw] sm:w-full md:w-[30vw] lg:mr-5 h-screen  ">
         <div className="px-4 flex flex-col gap-5">
           <div className="flex justify-between items-center mt-5">
             <h1 className="text-white font-extrabold text-3xl">CSGO</h1>
@@ -96,6 +135,6 @@ export function Menu() {
           ))}
         </ul>
       </div>
-    </div>
+    </motion.div>
   );
 }

@@ -15,13 +15,13 @@ const config: Config = {
       },
     },
     screens: {
-      sm: "576px",
-      // => @media (min-width: 576px) { ... }
+      sm: "250px",
+      // // => @media (min-width: 576px) { ... }
 
-      md: "960px",
+      md: "700px",
       // => @media (min-width: 960px) { ... }
 
-      lg: "1440px",
+      lg: "1645px",
       // => @media (min-width: 1440px) { ... }
     },
   },

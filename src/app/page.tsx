@@ -1,4 +1,4 @@
-import { Menu } from "./components/Menu";
+import { Menu, MenuContainer } from "./components/Menu";
 import { WeaponsAndRewards } from "./components/Weapons&Rewards";
 import { SideMenu } from "./components/ProfileActivity";
 
@@ -11,11 +11,12 @@ export default function Home() {
     pfp: "/pfp.jpg",
   };
   return (
-    <main className="flex py-5 px-8 lg:p-0 ">
-      <Menu />
+    <main className="flex py-2 px-2 justify-center items-center">
+      <Menu className="sm:hidden md:hidden lg:flex" />
+      <MenuContainer />
       <WeaponsAndRewards user={user} />
       <SideMenu user={user} />
-      {/* <SideMenu /> */}
+      {/* <SideMenu  /> */}
     </main>
   );
 }
